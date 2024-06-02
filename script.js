@@ -4,7 +4,7 @@ window.onload = async () => {
     try {
         await loadCharacters(currentPageUrl);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         alert('Erro ao carregar cards');
     }
 
@@ -13,6 +13,14 @@ window.onload = async () => {
 
     nextButton.addEventListener('click', loadNextPage);
     backButton.addEventListener('click', loadPreviousPage);
+
+    // Adiciona o evento para fechar a modal ao clicar fora dela
+    window.addEventListener('click', (event) => {
+        const modal = document.getElementById("modal");
+        if (event.target === modal) {
+            modal.style.visibility = "hidden";
+        }
+    });
 };
 
 async function loadCharacters(url) {
@@ -21,6 +29,9 @@ async function loadCharacters(url) {
 
     try {
         const response = await fetch(url); // Faz a requisição para a URL.
+        if (!response.ok) {
+            throw new Error('Erro na requisição');
+        }
         const responseJson = await response.json();
 
         responseJson.results.forEach((character) => {
@@ -93,7 +104,7 @@ async function loadCharacters(url) {
 
     } catch (error) {
         alert('Erro ao carregar os personagens');
-        console.log(error);
+        console.error(error);
     }
 }
 
@@ -102,12 +113,17 @@ async function loadNextPage() {
 
     try {
         const response = await fetch(currentPageUrl); // Faz a requisição para a URL atual.
+        if (!response.ok) {
+            throw new Error('Erro na requisição');
+        }
         const responseJson = await response.json();
 
-        await loadCharacters(responseJson.next); // Carrega a próxima página.
+        if (responseJson.next) {
+            await loadCharacters(responseJson.next); // Carrega a próxima página.
+        }
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         alert('Erro ao carregar a próxima página');
     }
 }
@@ -117,12 +133,17 @@ async function loadPreviousPage() {
 
     try {
         const response = await fetch(currentPageUrl); // Faz a requisição para a URL atual.
+        if (!response.ok) {
+            throw new Error('Erro na requisição');
+        }
         const responseJson = await response.json();
 
-        await loadCharacters(responseJson.previous); // Carrega a página anterior.
+        if (responseJson.previous) {
+            await loadCharacters(responseJson.previous); // Carrega a página anterior.
+        }
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         alert('Erro ao carregar a página anterior');
     }
 }
@@ -149,7 +170,7 @@ function convertHeight(height) {
         return "desconhecida";
     }
 
-    return (height / 100).toFixed(2);
+    return `${(height / 100).toFixed(2)} m`;
 }
 
 function convertMass(mass) {
